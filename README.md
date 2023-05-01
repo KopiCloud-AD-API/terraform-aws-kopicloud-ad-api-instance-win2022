@@ -22,10 +22,10 @@ and then in **aws_instance** section, comment the subnet_id = aws_subnet.public-
 
 ```
 resource "aws_instance" "api-server" {
-  ami             = data.aws_ami.windows-2022.id
-  instance_type   = var.api_instance_type
-  //subnet_id       = aws_subnet.public-subnet.id
-  subnet_id       = "subnet-0de7e64c5c78e47f4"
+  ami           = data.aws_ami.windows-2022.id
+  instance_type = var.api_instance_type
+  //subnet_id     = aws_subnet.public-subnet.id
+  subnet_id     = "subnet-0de7e64c5c78e47f4"
 ```
 
 ## Public IP
