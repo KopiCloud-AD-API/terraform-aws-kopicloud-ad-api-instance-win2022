@@ -21,3 +21,4 @@ output "vm_api_server_instance_public_ip" {
 output "vm_api_server_instance_private_ip" {
   value = aws_instance.api-server.private_ip
 }
+
