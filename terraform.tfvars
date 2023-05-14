@@ -2,8 +2,8 @@
 app_environment = "dev"  # Dev, Test, Staging, Prod, etc
 
 # Network
-vpc_cidr           = "10.11.0.0/16"
-public_subnet_cidr = "10.11.1.0/24"
+vpc_cidr           = "10.12.0.0/16"
+public_subnet_cidr = "10.12.1.0/24"
 
 # AWS Settings
 aws_access_key = "update-this"
