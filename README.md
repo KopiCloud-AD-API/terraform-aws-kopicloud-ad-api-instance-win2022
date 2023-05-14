@@ -42,12 +42,29 @@ And set the variable **api_associate_public_ip_address** to false.
 
 - The default Windows username is **Administrator**, and get the password from the AWS Console.
 
+## Configuring AWS Credentials
+
+Read the document **How to create an IAM account and configure Terraform to use AWS static credentials** to configure credentials.
+
+https://medium.com/@gmusumeci/how-to-create-an-iam-account-and-configure-terraform-to-use-aws-static-credentials-a8ea4dd4fdfc
+
 ## How to Set Up KopiCloud AD API
 
-1. Get a License - Generate a free trial license (no credit card required) or purchase a license [here](https://www.kopicloud-ad-api.com/get-license)
+1. Get a License - Generate a free trial license (no credit card required) or purchase a license [here](https://www.kopicloud-ad-api.com/get-license).
 
-2. Install **KopiCloud AD API** using the code in this repo
+2. Install **KopiCloud AD API** using the code in this repo.
 
-3. Join the machine to the AD Domain to manage using the API
+3. Join the machine to the AD Domain to manage using the API.
 
-4. Run the **KopiCloud AD API Config tool** located in the folder **C:\KopiCloud-AD-API-Config**
+4. Create a Service Account with Domain Administrators permissions for the **KopiCloud AD API**.
+
+5. Run the **KopiCloud AD API Config tool** located in the folder **C:\KopiCloud-AD-API-Config** to finish the setup of API.
+
+**Note:** You cannot log in to the **KopiCloud AD API Portal** using the Service Account for security reasons.
+
+## Resources
+
+KopiCloud AD API Official Web Site: https://www.kopicloud-ad-api.com
+
+KopiCloud AD API Documentation: https://help.kopicloud-ad-api.com
+
