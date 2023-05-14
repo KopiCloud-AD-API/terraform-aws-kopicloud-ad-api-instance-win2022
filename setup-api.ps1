@@ -32,7 +32,9 @@ Enable-WindowsOptionalFeature -Online -FeatureName NetFx4Extended-ASPNET45;
 <# Install DNS Management #>;
 Install-WindowsFeature RSAT-DNS-Server;
 
-<# Set Local Administrator Password Expiration #>;
+<# Set Local Administrator Password #>;
+Write-Host "# Set Local Administrator Password #";
+net user Administrator $admin_password;
 wmic useraccount where "name='Administrator'" set PasswordExpires=FALSE;
 
 <# Creating the Service Account User #>;
@@ -44,7 +46,6 @@ New-LocalUser -Name $apiusername -Password $password -FullName $apiusername -Des
 Add-LocalGroupMember -Group "Administrators" -Member $apiusername;
 
 <# Create folders for the website #>; 
-Write-Host "# Creating folders for the website #";
 if (!(test-path $codefolder)) { New-Item -Path $codefolder -ItemType Directory };
 
 <# Assign Permissions to the Website Folder #>; 
@@ -57,7 +58,6 @@ $acl.SetAccessRule($AccessRule2);
 $acl | Set-Acl -Path $codefolder;
 
 <# Download API Code #>;
-Write-Host "# Downloading API Code #";
 $Version = Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/KopiCloud-AD-API-Setup/Setup-Files/main/release.version' -UseBasicParsing;
 $Url = 'https://github.com/KopiCloud-AD-API-Setup/Setup-Files/releases/download/' + $Version.Content.Trim() + '/KopiCloud-AD-API.zip';
 $destination = "$env:TEMP\KopiCloud-AD-API.zip";
@@ -67,7 +67,6 @@ Invoke-WebRequest -Uri $Url -OutFile $destination -UseBasicParsing;
 Expand-Archive -Path $destination -DestinationPath $codefolder -Force;
 
 <# Install IIS #>;
-Write-Host "# Installing IIS #";
 Install-WindowsFeature -Name web-server -IncludeManagementTools;
 Enable-WindowsOptionalFeature -Online -FeatureName IIS-ApplicationDevelopment;
 Enable-WindowsOptionalFeature -Online -FeatureName IIS-ApplicationInit;
@@ -89,8 +88,18 @@ Set-ItemProperty IIS:\AppPools\$website -Name processModel -Value @{username=$ap
 Set-WebConfigurationProperty -pspath 'MACHINE/WEBROOT/APPHOST' -filter "system.applicationHost/sites/site[@name='$website']/application[@path='/']/virtualDirectory[@path='/']" -name "userName" -value $apiusername;
 Set-WebConfigurationProperty -pspath 'MACHINE/WEBROOT/APPHOST' -filter "system.applicationHost/sites/site[@name='$website']/application[@path='/']/virtualDirectory[@path='/']" -name "password" -value $apipassword;
 
+<# Download Rewrite URL #>;
+$source = "https://download.microsoft.com/download/1/2/8/128E2E22-C1B9-44A4-BE2A-5859ED1D4592/rewrite_amd64_en-US.msi";
+$destination = "$env:TEMP\rewrite.msi";
+Invoke-WebRequest -Uri $source -OutFile $destination -UseBasicParsing;
+
+<# Install RewriteURL #>;
+$MSIArguments = "/i $destination /quiet";
+Start-Process "msiexec.exe" -ArgumentList $MSIArguments -Wait -NoNewWindow;
 <# Download .NET Core 6 #>; 
-$source = "https://download.visualstudio.microsoft.com/download/pr/7ab0bc25-5b00-42c3-b7cc-bb8e08f05135/91528a790a28c1f0fe39845decf40e10/dotnet-hosting-6.0.16-win.exe";
+<# $source = "https://download.visualstudio.microsoft.com/download/pr/7ab0bc25-5b00-42c3-b7cc-bb8e08f05135/91528a790a28c1f0fe39845decf40e10/dotnet-hosting-6.0.16-win.exe"; #>; 
+$source = "https://download.visualstudio.microsoft.com/download/pr/e38901ef-e9ac-4331-a6aa-f2aec3b1754b/6d695fa51a4960393edaf725ce970a86/dotnet-hosting-6.0.15-win.exe";
+
 $destination = "$env:TEMP\net6.exe";
 Invoke-WebRequest -Uri $source -OutFile $destination -UseBasicParsing;
 
@@ -105,15 +114,6 @@ $certThumbprint = New-SelfSignedCertificate -DnsName $machine -CertStoreLocation
 New-WebBinding -Name $website -Protocol "https";
 $api = Get-WebBinding -Name $website;
 $api.AddSslCertificate($certThumbprint.Thumbprint, "My");
-
-<# Download Rewrite URL #>;
-$source = "https://download.microsoft.com/download/1/2/8/128E2E22-C1B9-44A4-BE2A-5859ED1D4592/rewrite_amd64_en-US.msi";
-$destination = "$env:TEMP\rewrite.msi";
-Invoke-WebRequest -Uri $source -OutFile $destination -UseBasicParsing;
-
-<# Install RewriteURL #>;
-$MSIArguments = "/i $destination /quiet";
-Start-Process "msiexec.exe" -ArgumentList $MSIArguments -Wait -NoNewWindow;
 
 <# Create Rewrite URL Rule to Enforce HTTPS #>;
 $rulename = $website + ' http to https';
@@ -140,7 +140,7 @@ Remove-Item $Path\$Installer;
 DISABLED #>;
  
 <# Install SQL Server Express 2022 #>;
-Write-Host "# Installing SQL Server Express 2022 #";
+Write-Host "# Install SQL Server Express 2022 #";
 $instance = "MSSQLSERVER";
 $SQLMedia = "C:\SQLMedia";
 $SQLData = "C:\SQLData";
@@ -189,6 +189,7 @@ $loginDB.Create($sqluserPassword);
 <# Grant Sysadmin Permissions to SQL DB Access User #>;
 $sysadminRoleDB = $server.Roles['sysadmin'];
 $sysadminRoleDB.AddMember($sqluserDB);
+$sysadminRoleDB.Alter();
 
 <# Download the API Config Tool #>;
 Write-Host "# Download the API Config Tool #";
