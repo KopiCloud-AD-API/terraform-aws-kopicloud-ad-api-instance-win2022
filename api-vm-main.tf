@@ -91,3 +91,4 @@ resource "aws_eip_association" "api-eip-association" {
   instance_id   = aws_instance.api-server.id
   allocation_id = aws_eip.api-eip.id
 }
+
